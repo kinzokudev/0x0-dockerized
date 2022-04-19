@@ -13,7 +13,8 @@ services:
     expose:
       - 8080
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres
@@ -26,6 +27,11 @@ services:
       - 5432
     volumes:
       - ./data/db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   nginx:
     build: ./nginx
