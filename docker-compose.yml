@@ -40,7 +40,10 @@ services:
     container_name: nginx
     volumes:
       - ./data/up:/etc/nginx/html/up
+    environment:
+      - MAX_SIZE=256M
     ports:
       - 80:80
     depends_on:
       - app
+
