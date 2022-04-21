@@ -4,6 +4,12 @@ WORKDIR /app
 
 COPY . /app
 
+RUN apt-get update
+RUN apt-get -y install cron
+
+# Files cleanup cronjob
+RUN crontab -l | { cat; echo "0 2 * * * /app/cleanup.py"; } | crontab -
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 CMD flask db upgrade; \

@@ -9,6 +9,8 @@ services:
       DATABASE_URI: "postgresql://toor:toor@db/db"
       FLASK_APP: fhost
       APP_PORT: 8080
+      # size in MB
+      MAX_SIZE: 512
     volumes:
       - ./data/up:/app/up
     expose:
@@ -29,7 +31,7 @@ services:
     volumes:
       - ./data/db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
+      test: ["CMD-SHELL", "pg_isready -d db -U toor"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -41,9 +43,8 @@ services:
     volumes:
       - ./data/up:/etc/nginx/html/up
     environment:
-      MAX_SIZE: 256M
+      MAX_SIZE: 512M
     ports:
       - 80:80
     depends_on:
       - app
-
