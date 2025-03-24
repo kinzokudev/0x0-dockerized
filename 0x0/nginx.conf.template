@@ -1,0 +1,5 @@
+client_max_body_size ${MAX_SIZE};
+
+map $host $app_ip {
+  default "${APP_IP}";
+}

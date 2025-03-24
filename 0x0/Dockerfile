@@ -14,3 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 CMD flask db upgrade; \
 	uwsgi --socket 0.0.0.0:8080 --wsgi-file fhost.py --callable app --processes 4 --threads 2
+
+FROM nginx:1.21.6-alpine
+
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
