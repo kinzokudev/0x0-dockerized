@@ -11,9 +11,71 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-      - name: cd into 0x0 directory and build Docker image
-        run: cd 0x0/ && docker build . --tag 0x0-app:$(date +%s)
-      - uses: actions/checkout@v4
-      - name: cd into nginx directory and build Docker image
-        run: cd nginx/ && docker build . --tag 0x0-nginx:$(date +%s)
+      # - uses: actions/checkout@v4
+      # - name: cd into 0x0 directory and build Docker image
+      #   run: cd 0x0/ && docker build . --tag 0x0-app:$(date +%s)
+      # - uses: actions/checkout@v4
+      # - name: cd into nginx directory and build Docker image
+      #   run: cd nginx/ && docker build . --tag 0x0-nginx:$(date +%s)
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Docker meta 0x0-app
+        id: meta-app
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            ghcr.io/kinzokudev/0x0-app
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+
+      - name: Docker meta 0x0-nginx
+        id: meta-nginx
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            ghcr.io/kinzokudev/0x0-nginx
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+
+      - name: Login to Github Container Registry
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        with:
+          registry: ghcr.io
+          username: "${{ github.actor }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Build and push 0x0-app
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        with:
+          context: ./0x0
+          push: true
+          tags: ${{ steps.meta-app.outputs.tags }}
+          labels: ${{ steps.meta-app.outputs.labels }}
+
+      - name: Build and push 0x0-nginx
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        with:
+          context: ./nginx
+          push: true
+          tags: ${{ steps.meta-nginx.outputs.tags }}
+          labels: ${{ steps.meta-nginx.outputs.labels }}
